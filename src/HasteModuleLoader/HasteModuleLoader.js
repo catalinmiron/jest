@@ -123,7 +123,6 @@ function Loader(config, environment, resourceMap) {
   this._reverseDependencyMap = null;
   this._shouldAutoMock = true;
   this._configShouldMockModuleNames = {};
-
   if (_configUnmockListRegExpCache === null) {
     // Node must have been run with --harmony in order for WeakMap to be
     // available
@@ -133,7 +132,6 @@ function Loader(config, environment, resourceMap) {
 
     _configUnmockListRegExpCache = new WeakMap();
   }
-
   if (!config.unmockedModulePathPatterns
       || config.unmockedModulePathPatterns.length === 0) {
     this._unmockListRegExps = [];
@@ -332,7 +330,6 @@ Loader.prototype._getNormalizedModuleID = function(currPath, moduleName) {
   var moduleType;
   var mockAbsPath = null;
   var realAbsPath = null;
-
   if (this._builtInModules.hasOwnProperty(moduleName)) {
     moduleType = 'builtin';
     realAbsPath = moduleName;
@@ -591,7 +588,7 @@ Loader.prototype._shouldMock = function(currPath, moduleName) {
       this._configShouldMockModuleNames[moduleName] = true;
       for (var i = 0; i < this._unmockListRegExps.length; i++) {
         unmockRegExp = this._unmockListRegExps[i];
-        if (unmockRegExp.test(modulePath)) {
+        if (unmockRegExp.test(modulePath) || modulePath === null) {
           return this._configShouldMockModuleNames[moduleName] = false;
         }
       }
@@ -687,7 +684,6 @@ Loader.prototype.getDependenciesFromPath = function(modulePath) {
       'Could not extract dependency information from this type of file!'
     );
   }
-
   return this._getDependencyPathsFromResource(resource);
 };
 
@@ -836,7 +832,8 @@ Loader.prototype.requireModule = function(currPath, moduleName,
   if (!moduleResource
       && manualMockResource
       && manualMockResource.path !== this._isCurrentlyExecutingManualMock
-      && this._explicitShouldMock[moduleID] !== false) {
+      && this._explicitShouldMock[moduleID] !== false
+      && !(moduleName in NODE_CORE_MODULES)) {
     modulePath = manualMockResource.path;
   }
 
